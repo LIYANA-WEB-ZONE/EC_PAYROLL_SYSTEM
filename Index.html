@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --accent: #059669;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --text-dark: #0f172a;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            padding: 35px 25px;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            margin-top: 10px;
+        }
+
+        h2 { 
+            text-align: center; 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: var(--primary);
+            margin-bottom: 25px;
+        }
+
+        .search-area {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--text-dark);
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        button.search-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: 0.3s;
+        }
+
+        button.search-btn:hover { background: var(--primary-dark); }
+
+        .result-box { display: none; animation: slideDown 0.4s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } }
+
+        .history-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* මාසය තෝරන කොටුවට පහළින් වැටෙන දිග කඩ ඉර */
+        .dashed-divider {
+            border: none;
+            border-top: 2px dashed #cbd5e1;
+            margin: 25px 0;
+            width: 100%;
+        }
+
+        .history-box label { 
+            font-size: 12px; 
+            font-weight: 800; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            display: block; 
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .month-header { text-align: center; margin-bottom: 20px; }
+        .month-header h3 { font-size: 26px; margin: 0; color: var(--text-dark); font-weight: 800; }
+
+        .data-card {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+
+        .data-group {
+            padding: 16px 0; 
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-group:last-child { border: none; }
+
+        .item-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .item-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            display: block;
+        }
+
+        .salary-val {
+            font-size: 24px;
+            color: #000000;
+            font-weight: 800;
+        }
+
+        .pdf-link {
+            display: block;
+            text-align: center;
+            padding: 18px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 800;
+            transition: 0.3s;
+        }
+        
+        .btn-active { background: var(--accent); color: white; }
+        .btn-error { background: var(--danger); color: white; pointer-events: none; opacity: 0.9; }
+
+        .loader { display: none; text-align: center; padding: 15px; }
+        .spinner { width: 24px; height: 24px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>PAYROLL SYSTEM</h2>
+    
+    <div class="search-area">
+        <input type="text" id="searchInput" placeholder="Enter NIC / ID Number">
+        <button class="search-btn" onclick="fetchData()">Show Statement</button>
+    </div>
+
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="resultBox" class="result-box">
+        <div class="history-box" id="historyDiv">
+            <label>Select Salary Period</label>
+            <select id="monthSelector" onchange="changeMonth()"></select>
+        </div>
+
+        <hr class="dashed-divider">
+
+        <div class="month-header">
+            <h3 id="currentMonthDisplay">---</h3>
+        </div>
+        
+        <div class="data-card">
+            <div class="data-group">
+                <span class="item-label">Employee Name</span>
+                <span id="outName" class="item-value">---</span>
+            </div>
+            
+            <div class="data-group">
+                <span class="item-label">Service Number</span>
+                <span id="outServiceNo" class="item-value">---</span>
+            </div>
+
+            <div class="data-group">
+                <span class="item-label">Bank Account</span>
+                <span id="outBank" class="item-value">---</span>
+            </div>
+
+            <div class="data-group">
+                <span class="item-label">Account No</span>
+                <span id="outAcc" class="item-value">---</span>
+            </div>
+
+            <div class="data-group">
+                <span class="item-label">Net Salary</span>
+                <span id="outSalary" class="item-value salary-val">---</span>
+            </div>
+        </div>
+
+        <a id="pdfDownload" href="#" class="pdf-link">Download Paysheet</a>
+    </div>
+</div>
+
+<script>
+    // JavaScript කොටස කලින් තිබූ විදියටම පවතී
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNBHl9xvJyJKdtDdBpkW6mwk4sfFdiD-x7Il9EUMdWtk2_eO_rMJvwYTSBzVu2kZt2/exec";
+    let allData = [];
+
+    async function fetchData() {
+        const val = document.getElementById('searchInput').value;
+        if (!val) return;
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('resultBox').style.display = 'none';
+
+        try {
+            const res = await fetch(`${SCRIPT_URL}?id=${val}`);
+            const data = await res.json();
+            document.getElementById('loader').style.display = 'none';
+
+            const idMatches = data.filter(item => item.nic.toString() === val.toString());
+
+            if (idMatches.length > 0) {
+                allData = idMatches;
+                const selector = document.getElementById('monthSelector');
+                selector.innerHTML = "";
+                
+                idMatches.forEach((item, index) => {
+                    let opt = document.createElement('option');
+                    opt.value = index;
+                    opt.text = item.month + " Month";
+                    selector.appendChild(opt);
+                });
+
+                const latest = idMatches.length - 1;
+                selector.value = latest;
+                updateUI(latest);
+                
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('historyDiv').style.display = idMatches.length > 1 ? 'block' : 'none';
+            } else {
+                alert("No records found for this NIC.");
+            }
+        } catch (e) {
+            document.getElementById('loader').style.display = 'none';
+            alert("Connection Error");
+        }
+    }
+
+    function updateUI(idx) {
+        const item = allData[idx];
+        document.getElementById('currentMonthDisplay').innerText = item.month + " Month";
+        document.getElementById('outName').innerText = item.name;
+        document.getElementById('outServiceNo').innerText = item.serviceNo;
+        document.getElementById('outBank').innerText = item.bank;
+        document.getElementById('outAcc').innerText = item.account;
+        
+        const formattedSalary = Number(item.salary).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('outSalary').innerText = "Rs. " + formattedSalary;
+
+        const btn = document.getElementById('pdfDownload');
+        if (item.pdf && item.pdf.trim() !== "") {
+            btn.href = item.pdf;
+            btn.innerText = "Download Paysheet";
+            btn.className = "pdf-link btn-active";
+        } else {
+            btn.innerText = "Not Found Paysheet";
+            btn.className = "pdf-link btn-error";
+        }
+    }
+
+    function changeMonth() {
+        updateUI(document.getElementById('monthSelector').value);
+    }
+</script>
+
+</body>
+</html>
