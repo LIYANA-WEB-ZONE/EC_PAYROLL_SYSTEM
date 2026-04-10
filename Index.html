@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Payroll System</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -16,17 +16,23 @@
             --border: #e2e8f0;
         }
 
+        /* දත්ත ලැබෙන තුරු පිටුව scroll වීම සම්පූර්ණයෙන් තහනම් කරයි */
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
             margin: 0;
             display: flex;
             justify-content: center;
-            /* පෙර තිබූ flex-start ම තබා ගනිමින් උස පාලනය කර ඇත */
-            align-items: flex-start; 
+            align-items: flex-start;
             min-height: 100vh;
+            overflow: hidden; /* මුලින් scroll වීම නවත්වයි */
             padding: 20px;
             box-sizing: border-box;
+        }
+
+        /* දත්ත ලැබුණු පසු scroll වීමට ඉඩ දීමට මෙම class එක භාවිතා කරයි */
+        body.allow-scroll {
+            overflow: auto;
         }
 
         .container {
@@ -36,9 +42,8 @@
             padding: 35px 25px;
             border-radius: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-            /* මුලින්ම පවතින ඉඩ ස්ථාවර කර ඇත */
-            margin-top: 40px;
-            margin-bottom: 40px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
         h2 { 
@@ -274,6 +279,8 @@
                 selector.value = latest;
                 updateUI(latest);
                 
+                // දත්ත පෙන්වන විට පමණක් scroll වීමට ඉඩ දෙයි
+                document.body.classList.add('allow-scroll');
                 document.getElementById('resultBox').style.display = 'block';
                 document.getElementById('historyDiv').style.display = idMatches.length > 1 ? 'block' : 'none';
             } else {
